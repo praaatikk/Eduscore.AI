@@ -55,29 +55,39 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
+        username = request.form['username'].strip()
+        email = request.form['email'].strip()
         password = request.form['password']
 
-        # Check if user exists
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
-            flash('Email already registered.', 'danger')
+        # ✅ Check if username already exists
+        existing_user_by_username = User.query.filter_by(username=username).first()
+        if existing_user_by_username:
+            flash('Username already taken. Please choose another.', 'danger')
             return redirect(url_for('register'))
 
-        # Hash password securely
+        # ✅ Check if email already exists
+        existing_user_by_email = User.query.filter_by(email=email).first()
+        if existing_user_by_email:
+            flash('Email already registered. Please use another.', 'danger')
+            return redirect(url_for('register'))
+
+        # ✅ Hash password securely
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
 
-        # Save new user
-        new_user = User(username=username, email=email, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
+        # ✅ Try to save user, handle unexpected DB errors gracefully
+        try:
+            new_user = User(username=username, email=email, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registration successful! Please log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An unexpected error occurred. Please try again.', 'danger')
+            print("Error during registration:", e)
+            return redirect(url_for('register'))
 
     return render_template('register.html')
-
 
 # ------------------- Login -------------------
 @app.route('/login', methods=['GET', 'POST'])

@@ -1,3 +1,4 @@
+import os
 import sys
 import pandas as pd
 from src.exception import CustomException
@@ -6,26 +7,27 @@ from src.utils import load_object
 
 class PredictPipeline:
     def __init__(self):
-        pass 
+        pass
 
-
-    def predict(self,features):
+    def predict(self, features):
         try:
-            model_path = 'artifacts\model.pkl'
-            preprocessor_path= 'artifacts\preprocessor.pkl' 
-            model = load_object(file_path= model_path)
-            preprocessor = load_object(file_path= preprocessor_path)
+            # ✅ FIX: Use os.path.join so paths work on both Windows & Linux (cloud)
+            model_path = os.path.join('artifacts', 'model.pkl')
+            preprocessor_path = os.path.join('artifacts', 'preprocessor.pkl')
+
+            model = load_object(file_path=model_path)
+            preprocessor = load_object(file_path=preprocessor_path)
+
             data_scaled = preprocessor.transform(features)
             preds = model.predict(data_scaled)
             return preds
-        
-        except Exception as e:
-             raise CustomException(e,sys)
 
+        except Exception as e:
+            raise CustomException(e, sys)
 
 
 class CustomData:
-    def __init__(self, 
+    def __init__(self,
                  gender: str,
                  race_ethnicity: str,
                  parental_level_of_education,
@@ -33,20 +35,14 @@ class CustomData:
                  test_preparation_course: str,
                  reading_score: int,
                  writing_score: int):
-                self.gender = gender
 
-                self.race_ethnicity = race_ethnicity
-
-                self.parental_level_of_education = parental_level_of_education
-
-                self.lunch = lunch
-
-                self.test_preparation_course = test_preparation_course
-
-                self.reading_score = reading_score
-
-                self.writing_score = writing_score
-
+        self.gender = gender
+        self.race_ethnicity = race_ethnicity
+        self.parental_level_of_education = parental_level_of_education
+        self.lunch = lunch
+        self.test_preparation_course = test_preparation_course
+        self.reading_score = reading_score
+        self.writing_score = writing_score
 
     def get_data_as_data_frame(self):
         try:
@@ -59,9 +55,7 @@ class CustomData:
                 "reading_score": [self.reading_score],
                 "writing_score": [self.writing_score],
             }
-
             return pd.DataFrame(custom_data_input_dict)
 
         except Exception as e:
             raise CustomException(e, sys)
-            

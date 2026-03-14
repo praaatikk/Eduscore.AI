@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Eduscore.AI{% endblock %}
+
+{% block content %}
+<style>
+  .dashboard-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+  }
+
+  .dashboard-header h2 {
+    font-weight: 600;
+    font-size: 2rem;
+  }
+
+  .dashboard-header p {
+    opacity: 0.85;
+    font-size: 1rem;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px 30px;
+    text-align: center;
+    color: white;
+    min-width: 150px;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #43e97b;
+  }
+
+  .stat-card .stat-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+
+  .table-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .table-card h5 {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .table {
+    color: white;
+  }
+
+  .table thead th {
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+  }
+
+  .table tbody td {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    vertical-align: middle;
+    font-size: 0.9rem;
+  }
+
+  .score-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .score-high { background: rgba(67, 233, 123, 0.25); color: #43e97b; }
+  .score-mid  { background: rgba(255, 200, 50, 0.25);  color: #ffc832; }
+  .score-low  { background: rgba(255, 80, 80, 0.25);   color: #ff5050; }
+
+  .empty-state {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    padding: 50px 20px;
+  }
+
+  .empty-state .icon { font-size: 3rem; margin-bottom: 15px; }
+
+  .btn-predict {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 10px 25px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-predict:hover {
+    transform: translateY(-2px);
+    color: #000;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<!-- Header -->
+<div class="dashboard-header">
+  <h2>📊 Your Dashboard</h2>
+  <p>Welcome back, <strong>{{ session['username'] }}</strong>! Here's your prediction history.</p>
+</div>
+
+{% if predictions %}
+
+  <!-- Stats Row -->
+  {% set total = predictions | length %}
+  {% set avg = (predictions | sum(attribute='predicted_score')) / total %}
+  {% set best = predictions | max(attribute='predicted_score') %}
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ total }}</div>
+      <div class="stat-label">Total Predictions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ "%.1f" | format(avg) }}</div>
+      <div class="stat-label">Average Score</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ "%.1f" | format(best.predicted_score) }}</div>
+      <div class="stat-label">Best Score</div>
+    </div>
+  </div>
+
+  <!-- Prediction History Table -->
+  <div class="table-card">
+    <h5>📋 Prediction History</h5>
+    <div class="table-responsive">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Gender</th>
+            <th>Ethnicity</th>
+            <th>Parent Edu</th>
+            <th>Lunch</th>
+            <th>Test Prep</th>
+            <th>Reading</th>
+            <th>Writing</th>
+            <th>Predicted Score</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in predictions %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ p.gender | capitalize }}</td>
+            <td>{{ p.race_ethnicity | capitalize }}</td>
+            <td>{{ p.parental_education | capitalize }}</td>
+            <td>{{ p.lunch | capitalize }}</td>
+            <td>{{ p.test_prep | capitalize }}</td>
+            <td>{{ p.reading_score | int }}</td>
+            <td>{{ p.writing_score | int }}</td>
+            <td>
+              {% if p.predicted_score >= 75 %}
+                <span class="score-badge score-high">{{ "%.1f" | format(p.predicted_score) }}</span>
+              {% elif p.predicted_score >= 50 %}
+                <span class="score-badge score-mid">{{ "%.1f" | format(p.predicted_score) }}</span>
+              {% else %}
+                <span class="score-badge score-low">{{ "%.1f" | format(p.predicted_score) }}</span>
+              {% endif %}
+            </td>
+            <td style="opacity:0.7; font-size:0.8rem;">
+              {{ p.created_at.strftime('%d %b %Y') if p.created_at else '-' }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% else %}
+  <!-- Empty State -->
+  <div class="table-card">
+    <div class="empty-state">
+      <div class="icon">🎯</div>
+      <h5>No predictions yet!</h5>
+      <p>Make your first prediction to see your history here.</p>
+      <a href="{{ url_for('predict_datapoint') }}" class="btn-predict">Make a Prediction</a>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

@@ -106,7 +106,7 @@ Then open your browser and go to 👉 http://127.0.0.1:5000
 
 Register with your name, email, and password.
 
-Login to access the prediction form.
+ access the prediction form.
 
 Enter student data (gender, ethnicity, education level, etc.).
 

@@ -266,16 +266,19 @@ def predict_datapoint():
         db.session.rollback()
         print("Error saving prediction:", e)
 
-    # ✅ Send email alert to user
-    # ✅ Send email alert to teacher
+    
+    # ✅ Send email in background thread so it doesn't block the response
+    import threading
     TEACHER_EMAIL = "pratikksecondaryacc@gmail.com"
-    send_prediction_email(
-        to_email=TEACHER_EMAIL,
-        username=session['username'],
-        predicted_score=predicted_score,
-        reading_score=reading_score,
-        writing_score=writing_score
-    )
+    thread = threading.Thread(target=send_prediction_email, args=(
+        TEACHER_EMAIL,
+        session['username'],
+        predicted_score,
+        reading_score,
+        writing_score
+    ))
+    thread.daemon = True
+    thread.start()
 
     return render_template('home.html', results=predicted_score)
 

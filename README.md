@@ -6,7 +6,7 @@ EduScore.AI is a full-stack machine learning web application that predicts a stu
 ---
 
 ## 🌐 Live Demo
-> Deployed on Render — [Coming Soon]
+> 🚀 Deployed on Render — **[https://eduscore-ai.onrender.com](https://eduscore-ai.onrender.com)**
 
 ---
 
@@ -94,8 +94,8 @@ EduScore.AI/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/praaatikk/EduScoreAI.git
-cd EduScoreAI
+git clone https://github.com/praaatikk/Eduscore.AI.git
+cd Eduscore.AI
 ```
 
 ### 2. Create & activate a virtual environment

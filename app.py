@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 SUPABASE_DB_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://postgres.vkcdqpjcsyjmurcznlrt:Pratik5903%40@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres'
+    'postgresql://postgres.vkcdqpjcsyjmurcznlrt:Pratik5903%40@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres'
 )
 
 app.config['SQLALCHEMY_DATABASE_URI'] = SUPABASE_DB_URL

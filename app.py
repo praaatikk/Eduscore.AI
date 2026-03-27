@@ -267,18 +267,19 @@ def predict_datapoint():
         print("Error saving prediction:", e)
 
     
-    # ✅ Send email in background thread so it doesn't block the response
-    import threading
-    TEACHER_EMAIL = "pratikksecondaryacc@gmail.com"
-    thread = threading.Thread(target=send_prediction_email, args=(
-        TEACHER_EMAIL,
-        session['username'],
-        predicted_score,
-        reading_score,
-        writing_score
-    ))
-    thread.daemon = True
-    thread.start()
+    # ✅ Send email only when running locally (Render blocks Gmail port)
+    if not os.environ.get('RENDER'):
+        import threading
+        TEACHER_EMAIL = "pratikksecondaryacc@gmail.com"
+        thread = threading.Thread(target=send_prediction_email, args=(
+            TEACHER_EMAIL,
+            session['username'],
+            predicted_score,
+            reading_score,
+            writing_score
+        ))
+        thread.daemon = True
+        thread.start()
 
     return render_template('home.html', results=predicted_score)
 

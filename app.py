@@ -3,11 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 from datetime import datetime
+import pytz
 import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+ist = pytz.timezone('Asia/Kolkata')
+
+def get_ist_time():
+    return datetime.now(ist)
 
 # ------------------- Flask App Configuration -------------------
 app = Flask(__name__)
@@ -135,7 +140,7 @@ class Prediction(db.Model):
     reading_score = db.Column(db.Float)
     writing_score = db.Column(db.Float)
     predicted_score = db.Column(db.Float)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=get_ist_time)
 
     def __repr__(self):
         return f'<Prediction {self.username} - {self.predicted_score}>'

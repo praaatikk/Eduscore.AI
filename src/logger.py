@@ -1,16 +1,34 @@
 import logging
 import os
 from datetime import datetime
+import pytz
 
-LOG_FILE= f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
-logs_path = os.path.join(os.getcwd(), "logs", LOG_FILE)
-os.makedirs(logs_path, exist_ok=True)
+# Indian Standard Time
+ist = pytz.timezone('Asia/Kolkata')
 
-LOG_FILE_PATH = os.path.join(logs_path,LOG_FILE)
+# Log file name with IST time
+LOG_FILE = f"{datetime.now(ist).strftime('%m_%d_%Y_%H_%M_%S')}.log"
 
-logging.basicConfig(
-    filename=LOG_FILE_PATH,
-    format="[ %(asctime)s] %(lineno)d %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
+logs_dir = os.path.join(os.getcwd(), "logs")
+os.makedirs(logs_dir, exist_ok=True)
+
+LOG_FILE_PATH = os.path.join(logs_dir, LOG_FILE)
+
+# Custom time converter for logging (forces IST in logs)
+class ISTFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, ist)
+        if datefmt:
+            return dt.strftime(datefmt)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+formatter = ISTFormatter(
+    "[ %(asctime)s ] %(lineno)d %(name)s - %(levelname)s - %(message)s"
 )
 
+file_handler = logging.FileHandler(LOG_FILE_PATH)
+file_handler.setFormatter(formatter)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.addHandler(file_handler)
